@@ -64,7 +64,7 @@
 
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
-    #define MAXTHROTTLE 2000
+    #define MAXTHROTTLE 1864
 
   /****************************    Mincommand          *******************************/
     /* this is the value for the ESCs when they are not armed
@@ -544,8 +544,8 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
       //#define GYRO_LPF_256HZ     // This is the default setting, no need to uncomment, just for reference
       //#define GYRO_LPF_188HZ
       //#define GYRO_LPF_98HZ
-      #define GYRO_LPF_42HZ
-      //#define GYRO_LPF_20HZ
+      //#define GYRO_LPF_42HZ
+      #define GYRO_LPF_20HZ
       //#define GYRO_LPF_10HZ
       //#define GYRO_LPF_5HZ       // Use this only in extreme cases, rather change motors and/or props -- setting not available on ITG3200
 
@@ -632,13 +632,13 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
   The volume is limited with a defined heigth from the ground and a distance from the taking off point.
   This option need GPS and Buzzer installed on board!
   */
-    //#define VOLUME_FLIGHT
-    //#define VOLUME_FLIGHT_RTH
-    //#define VOLUME_HEIGTH_MAX 50
-    //#define VOLUME_DISTANCE_MAX 100
+    #define VOLUME_FLIGHT
+    #define VOLUME_FLIGHT_RTH
+    #define VOLUME_HEIGTH_MAX 20
+    #define VOLUME_DISTANCE_MAX 100
   
  /* The following defines are related to flying authorizations from to French air administration. */
-    //#define VOLUME_S1 
+    #define VOLUME_S1
     //#define VOLUME_S2
     //#define VOLUME_S3
     //#define VOLUME_2KG
@@ -763,7 +763,7 @@ Convert the degree+minutes into decimal degree by ==> degree+minutes*(1/60)
 Note the sign on declination it could be negative or positive (WEST or EAST)
 Also note, that maqgnetic declination changes with time, so recheck your value every 3-6 months */
 //#define MAG_DECLINATION  4.02f   //(**)
-#define MAG_DECLINATION  0.36f   //(**)
+#define MAG_DECLINATION  0.38f   //(**)
 
 // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
 #define GPS_LEAD_FILTER               //(**)
@@ -780,7 +780,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 #define SAFE_WP_DISTANCE           100      //(**)
 
 //Maximu allowable navigation altitude (in meters) automatic altitude control will not go above this height
-#define MAX_NAV_ALTITUDE           30     //(**)
+#define MAX_NAV_ALTITUDE           20     //(**)
 
 // minimum speed when approach waypoint
 #define NAV_SPEED_MIN              100    // cm/sec //(**)
@@ -794,7 +794,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 #define NAV_BANK_MAX 3000                 //(**)
 
 //Defines the RTH altitude. 0 means keep current alt during RTH (in meters)
-#define RTH_ALTITUDE               30        //(**)
+#define RTH_ALTITUDE               15        //(**)
 //Wait to reach RTH alt before start moving to home (0-no, 1-yes)
 #define WAIT_FOR_RTH_ALT           1         //(**)
 
