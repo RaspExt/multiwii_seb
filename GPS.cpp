@@ -347,7 +347,7 @@ uint8_t GPS_Compute(void) {
           GPS_calc_nav_rate(speed);
           GPS_adjust_heading();
           if ((wp_distance <= GPS_conf.wp_radius) || check_missed_wp()) {            //if yes switch to poshold mode
-            if (mission_step.parameter1 == 0) NAV_state = NAV_STATE_HOLD_INFINIT;
+            if (mission_step.parameter1 == 0 && !rcOptions[BOXLAND]) { NAV_state = NAV_STATE_HOLD_INFINIT; } //checks for box land
             else NAV_state = NAV_STATE_LAND_START;                                   // if parameter 1 in RTH step is non 0 then land at home
             if (GPS_conf.nav_rth_takeoff_heading) { magHold = nav_takeoff_bearing; }
           } 

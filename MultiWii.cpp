@@ -288,6 +288,17 @@ uint16_t intPowerTrigger1;
 int16_t failsafeEvents = 0;
 volatile int16_t failsafeCnt = 0;
 
+#if defined(FAILSAFE_LAND) || defined(FAILSAFE_RTH)  //Create a NAV based failsafe flag
+	bool failsafe_nav = true;
+#else
+	bool failsafe_nav = false;
+#endif
+#if defined(FAILSAFE_IGNORE_LAND) //Create a flag for FAILSAFE_IGNORE_LAND
+	bool failsafe_ignore = true;
+#else
+	bool failsafe_ignore = false;
+#endif
+
 int16_t rcData[RC_CHANS];    // interval [1000;2000]
 int16_t rcSerial[8];         // interval [1000;2000] - is rcData coming from MSP
 int16_t rcCommand[4];        // interval [1000;2000] for THROTTLE and [-500;+500] for ROLL/PITCH/YAW
@@ -979,20 +990,22 @@ void loop () {
     computeRC();
     // Failsafe routine - added by MIS
     #if defined(FAILSAFE)
-      if ( failsafeCnt > (5*FAILSAFE_DELAY) && f.ARMED) {                  // Stabilize, and set Throttle to specified level
-        for(i=0; i<3; i++) rcData[i] = MIDRC;                               // after specified guard time after RC signal is lost (in 0.1sec)
-        rcData[THROTTLE] = conf.failsafe_throttle;
-        if (failsafeCnt > 5*(FAILSAFE_DELAY+FAILSAFE_OFF_DELAY)) {          // Turn OFF motors after specified Time (in 0.1sec)
-          go_disarm();     // This will prevent the copter to automatically rearm if failsafe shuts it down and prevents
-          f.OK_TO_ARM = 0; // to restart accidentely by just reconnect to the tx - you will have to switch off first to rearm
+      if (GPS_numSat <5 || !f.GPS_FIX || !failsafe_nav){
+        if ( failsafeCnt > (5*FAILSAFE_DELAY) && f.ARMED) {                  // Stabilize, and set Throttle to specified level
+          for(i=0; i<3; i++) rcData[i] = MIDRC;                               // after specified guard time after RC signal is lost (in 0.1sec)
+          rcData[THROTTLE] = conf.failsafe_throttle;
+          if (failsafeCnt > 5*(FAILSAFE_DELAY+FAILSAFE_OFF_DELAY)) {          // Turn OFF motors after specified Time (in 0.1sec)
+            go_disarm();     // This will prevent the copter to automatically rearm if failsafe shuts it down and prevents
+            f.OK_TO_ARM = 0; // to restart accidentely by just reconnect to the tx - you will have to switch off first to rearm
+          }
+          failsafeEvents++;
         }
-        failsafeEvents++;
+        if ( failsafeCnt > (5*FAILSAFE_DELAY) && !f.ARMED) {  //Turn of "Ok To arm to prevent the motors from spinning after repowering the RX with low throttle and aux to arm
+            go_disarm();     // This will prevent the copter to automatically rearm if failsafe shuts it down and prevents
+            f.OK_TO_ARM = 0; // to restart accidentely by just reconnect to the tx - you will have to switch off first to rearm
+        }
+        failsafeCnt++;
       }
-      if ( failsafeCnt > (5*FAILSAFE_DELAY) && !f.ARMED) {  //Turn of "Ok To arm to prevent the motors from spinning after repowering the RX with low throttle and aux to arm
-          go_disarm();     // This will prevent the copter to automatically rearm if failsafe shuts it down and prevents
-          f.OK_TO_ARM = 0; // to restart accidentely by just reconnect to the tx - you will have to switch off first to rearm
-      }
-      failsafeCnt++;
     #endif
     // end of failsafe routine - next change is made with RcOptions setting
 
@@ -1286,6 +1299,34 @@ void loop () {
     // This handles the three rcOptions boxes 
     // unlike other parts of the multiwii code, it looks for changes and not based on flag settings
     // by this method a priority can be established between gps option
+
+	//NAV based failsafe
+    #if defined(FAILSAFE) && (defined(FAILSAFE_RTH) || defined(FAILSAFE_LAND))   //Check if failsafe option is enabled and if either failsafe_rth or failsafe_land options are enabled
+      if (f.GPS_FIX && GPS_numSat >=5){
+      if ( failsafeCnt > (5*FAILSAFE_DELAY) && f.ARMED){ //Test for failsafe condition
+        for(i=0; i<3; i++) rcData[i] = MIDRC;                               // after specified guard time after RC signal is lost (in 0.1sec)
+	  if (!((NAV_state == NAV_STATE_LAND_IN_PROGRESS || NAV_state == NAV_STATE_LANDED) && failsafe_ignore)){		//if FAILSAFE_IGNORE_LAND is enabled, only switch to rth/land if land is not in progress
+	    rcOptions[BOXLAND]=false;        //Disable land/home/hold gps boxes so they dont interfere with the failsafe
+        rcOptions[BOXGPSHOME]=false;
+	    rcOptions[BOXGPSHOLD]=false;
+	    #if defined(FAILSAFE_RTH)
+	      rcOptions[BOXGPSHOME]=true; //manually enable RTH gps box
+	    #endif
+	    #if defined(FAILSAFE_LAND)
+	      rcOptions[BOXLAND]=true; //manually enable LAND gps box
+          failsafe_ignore=false; //disable failsafe_ignore flag to prevent rth/land from constant resetting
+        #endif
+	   }
+          failsafeCnt=(5*FAILSAFE_DELAY); //Always keep failsafe count at the engage time to prevent disarm on short GPS fix drop
+        }
+        else{
+          #if defined(FAILSAFE_IGNORE_LAND)
+            failsafe_ignore=true;          //Reset failsafe_ignore flag once failsafe condition is releived only if FAILSAFE_IGNORE_LAND is defined
+          #endif
+        }
+        failsafeCnt++;  //increment failsafe counter
+      }
+    #endif
 
     //Generate a packed byte of all four GPS boxes.
     uint8_t gps_modes_check = (rcOptions[BOXLAND]<< 3) + (rcOptions[BOXGPSHOME]<< 2) + (rcOptions[BOXGPSHOLD]<<1) + (rcOptions[BOXGPSNAV]);

@@ -626,6 +626,11 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
     
     #define FAILSAFE_DETECT_TRESHOLD  985
 
+    /*   GPS NAV based failsafe options.   Only use if you have GPS navigation enabled    */
+    #define FAILSAFE_LAND  //Failsafe will perform a NAV land instead of throttle cut
+    #define FAILSAFE_RTH   //Failsafe will Return To Home, if FAILSAFE_LAND is also enabled, it will autoland once at home
+    #define FAILSAFE_IGNORE_LAND //Failsafe will be ignored if land is already in progress
+
  /******** Volume flight settings ********************/
  /* Volume flight can be used for limiting a flight in defined cylinder volume around the taking of landing.
   Initially, this code was required for French multiwii user that must be compliant to French air rules.
@@ -763,7 +768,7 @@ Convert the degree+minutes into decimal degree by ==> degree+minutes*(1/60)
 Note the sign on declination it could be negative or positive (WEST or EAST)
 Also note, that maqgnetic declination changes with time, so recheck your value every 3-6 months */
 //#define MAG_DECLINATION  4.02f   //(**)
-#define MAG_DECLINATION  0.38f   //(**)
+#define MAG_DECLINATION  0.28f   //(**)
 
 // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
 #define GPS_LEAD_FILTER               //(**)
@@ -794,7 +799,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 #define NAV_BANK_MAX 3000                 //(**)
 
 //Defines the RTH altitude. 0 means keep current alt during RTH (in meters)
-#define RTH_ALTITUDE               15        //(**)
+#define RTH_ALTITUDE               20        //(**)
 //Wait to reach RTH alt before start moving to home (0-no, 1-yes)
 #define WAIT_FOR_RTH_ALT           1         //(**)
 
@@ -809,7 +814,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 #define FENCE_DISTANCE      100
 
 //This governs the descent speed during landing. 100 is equals approc 50cm/sec
-#define LAND_SPEED          100
+#define LAND_SPEED          120
 
 
     #define ONLY_ALLOW_ARM_WITH_GPS_3DFIX      // Only allow FC arming if GPS has a 3D fix.
