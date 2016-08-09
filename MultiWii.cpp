@@ -1365,6 +1365,10 @@ void loop () {
 #endif
       if (f.GPS_FIX) {
         if (GPS_numSat >5 ) {
+          #if defined(AP_MODE)
+            if (f.GPS_mode == GPS_MODE_HOLD && (abs(rcCommand[ROLL]) > AP_MODE || abs(rcCommand[PITCH]) > AP_MODE))
+              GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]); // Move HoldPos
+          #endif
           if (prv_gps_modes != gps_modes_check) {                           //Check for change since last loop
             NAV_error = NAV_ERROR_NONE;
             if (rcOptions[BOXGPSHOME]) {                                    // RTH has the priotity over everything else
